@@ -8,137 +8,59 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var playerCard = "card7"
-    @State var cpuCard = "card2"
-    
-    @State var playerScore = 0
-    @State var cpuscore = 0
-    @State var result = ""
-    
-    
-    
+    @State private var viewModel = CardGameViewModel()
     
     var body: some View {
-        ZStack{
+        ZStack {
             Image("background-cloth")
                 .resizable()
                 .ignoresSafeArea()
             
-            VStack{
+            VStack {
                 Spacer()
                 Image("logo")
                 Spacer()
-                HStack{
+                
+                // Cards Display
+                HStack {
                     Spacer()
-                    Image(playerCard)
+                    Image(viewModel.playerCard.imageName)
                     Spacer()
-                    Image(cpuCard)
+                    Image(viewModel.cpuCard.imageName)
                     Spacer()
-                    
-                    
-                    
                 }
                 Spacer()
                 
+                // Deal Button
                 Button {
-                    deal()
+                    viewModel.deal()
                 } label: {
                     Image("button")
                 }
                 
-                
                 Spacer()
-                HStack{
+                
+                // Score Display
+                HStack {
                     Spacer()
-                    VStack {
-                        Text("Mendez")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(
-                                LinearGradient(
-                                    colors: [.blue, .blue.opacity(0.7)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(15)
-                            .shadow(color: .blue.opacity(0.3), radius: 5, x: 0, y: 3)
-                        
-                        VStack(spacing: 5) {
-                            Text("SCORE")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.white.opacity(0.7))
-                                .tracking(2)
-                            
-                            Text(String(playerScore))
-                                .font(.system(size: 70, weight: .bold, design: .rounded))
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [.yellow, .orange],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .shadow(color: .yellow.opacity(0.5), radius: 8, x: 0, y: 3)
-                        }
-                        .padding(.top, 10)
-                        
-                        
-                    }
+                    PlayerScoreView(
+                        playerName: viewModel.player.name,
+                        score: viewModel.player.score,
+                        gradientColors: [.blue, .blue.opacity(0.7)]
+                    )
                     Spacer()
-                    VStack {
-                        Text("Computer")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(
-                                LinearGradient(
-                                    colors: [.purple, .purple.opacity(0.7)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(15)
-                            .shadow(color: .purple.opacity(0.3), radius: 5, x: 0, y: 3)
-                        
-                        VStack(spacing: 5) {
-                            Text("SCORE")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.white.opacity(0.7))
-                                .tracking(2)
-                            
-                            Text(String(cpuscore))
-                                .font(.system(size: 70, weight: .bold, design: .rounded))
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [.yellow, .orange],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .shadow(color: .yellow.opacity(0.5), radius: 8, x: 0, y: 3)
-                        }
-                        .padding(.top, 10)
-                        
-                    }
-                    
+                    PlayerScoreView(
+                        playerName: viewModel.cpu.name,
+                        score: viewModel.cpu.score,
+                        gradientColors: [.purple, .purple.opacity(0.7)]
+                    )
                     Spacer()
-                    
-                    
-                    
                 }
                 .foregroundStyle(Color.white)
                 Spacer()
                 
-                
-                Text(result)
+                // Result Message
+                Text(viewModel.gameResult.message)
                     .font(.title3)
                     .fontWeight(.bold)
                     .foregroundStyle(Color.white)
@@ -155,15 +77,15 @@ struct ContentView: View {
                             )
                             .shadow(color: .green.opacity(0.5), radius: 15, x: 0, y: 5)
                     )
-                    .opacity(result.isEmpty ? 0 : 1)
-                    .animation(.spring(response: 0.5, dampingFraction: 0.7), value: result)
+                    .opacity(viewModel.gameResult.message.isEmpty ? 0 : 1)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.7), value: viewModel.gameResult.message)
                 
                 Spacer()
+                
+                // Clear Results Button
                 Button {
-                    result = "Start again!"
-                    
-                }
-                label: {
+                    viewModel.clearResults()
+                } label: {
                     Text("Clear results")
                         .font(.title2)
                         .fontWeight(.semibold)
@@ -179,49 +101,59 @@ struct ContentView: View {
                         )
                         .cornerRadius(20)
                         .shadow(color: .red.opacity(0.4), radius: 10, x: 0, y: 5)
-                   
                 }
-
             }
-            
-        }
-        
-        
-        
-    }
-    
-    func deal(){
-        
-        //randomize player card
-        var playerCardValue = Int.random(in: 2...14)
-        playerCard = "card" + String(playerCardValue)
-        
-        //randomize cpu card
-        var cpuCardValue = Int.random(in: 2...14)
-        cpuCard = "card" + String(cpuCardValue)
-        
-        // update the score based on who wins this hand
-        if playerCardValue > cpuCardValue {
-            playerScore += 1
-        } else if cpuCardValue > playerCardValue {
-            cpuscore += 1
-        } else {
-            // tie: do nothing
-        }
-
-        // check for game over at 10 points
-        if playerScore >= 10 {
-            result = "🎉 Victory! Mendez Wins! 🎉"
-            playerScore = 0
-            cpuscore = 0
-        } else if cpuscore >= 10 {
-            result = "💻 Computer Wins! Try Again"
-            cpuscore = 0
-            playerScore = 0
         }
     }
 }
 
+// MARK: - Subviews
+
+struct PlayerScoreView: View {
+    let playerName: String
+    let score: Int
+    let gradientColors: [Color]
+    
+    var body: some View {
+        VStack {
+            Text(playerName)
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(
+                    LinearGradient(
+                        colors: gradientColors,
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(15)
+                .shadow(color: gradientColors[0].opacity(0.3), radius: 5, x: 0, y: 3)
+            
+            VStack(spacing: 5) {
+                Text("SCORE")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .tracking(2)
+                
+                Text(String(score))
+                    .font(.system(size: 70, weight: .bold, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.yellow, .orange],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .shadow(color: .yellow.opacity(0.5), radius: 8, x: 0, y: 3)
+            }
+            .padding(.top, 10)
+        }
+    }
+}
 
 #Preview {
     ContentView()
