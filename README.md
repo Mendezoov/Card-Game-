@@ -23,7 +23,7 @@ A simple iOS card game built with SwiftUI where you compete against the computer
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/your-username/card-game.git
+   git clone https://github.com/Mendezoov/card-game.git
    ```
 2. Open `Card Game.xcodeproj` in Xcode
 3. Select a simulator or connected device
